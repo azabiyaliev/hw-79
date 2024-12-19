@@ -17,11 +17,11 @@ export type LocationWithoutID = Omit<Location, "id">
 export interface Subject {
     id: string;
     category_id: string;
-    category_location: string;
+    location_id: string;
     title: string;
     description: string;
-    image: string;
+    image: string | null;
     date: string;
 }
 
-export type SubjectWithoutID = Omit<Subject, "id">
+export type SubjectWithoutID = Omit<Subject, "id", "date">
