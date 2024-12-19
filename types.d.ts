@@ -6,13 +6,15 @@ export interface Category {
 
 export type CategoryWithoutID = Omit<Category, "id">
 
-export interface location {
+export interface Location {
     id: string;
     title: string;
     description: string;
 }
 
-export interface subjectOfAccounting {
+export type LocationWithoutID = Omit<Location, "id">
+
+export interface Subject {
     id: string;
     category_id: string;
     category_location: string;
@@ -21,3 +23,5 @@ export interface subjectOfAccounting {
     image: string;
     date: string;
 }
+
+export type SubjectWithoutID = Omit<Subject, "id">
