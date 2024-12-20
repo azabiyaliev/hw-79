@@ -1,8 +1,9 @@
 import express from "express";
 import mysqlDb from "../mysqlDb";
-import {Subject, SubjectWithoutID} from "../types";
+import {Category, Subject, SubjectWithoutID} from "../types";
 import {ResultSetHeader} from "mysql2";
 import {imagesUpload} from "../multer";
+import categoriesRouter from "./categories";
 const subjectsRouter = express.Router();
 
 
@@ -59,6 +60,24 @@ subjectsRouter.get("/:id", async (req, res) => {
     }
 })
 
+subjectsRouter.put("/:id", imagesUpload.single("image"), async (req, res) => {
+    const id = req.params.id;
+    const connection = await mysqlDb.getConnection();
+    const [resultWithId] = await connection.query("SELECT * FROM subjects WHERE id = ?", [id]);
+    const subjectWithId = resultWithId as Subject[];
+    const [result] = await connection.query("UPDATE subjects SET category_id = ?, location_id = ?, title = ?, description = ?, image = ? WHERE id = ?",
+        [req.body.category_id || subjectWithId[0].category_id, req.body.location_id || subjectWithId[0].location_id,
+            req.body.title || subjectWithId[0].title, req.body.description || subjectWithId[0].description, req.body.image || subjectWithId[0].image, id]);
+    const [resultSubject] = await connection.query('SELECT * FROM subjects WHERE id = ?', [id]);
+    const oneSubject = resultSubject as Subject[];
+    res.send(oneSubject[0]);
+})
 
+subjectsRouter.delete("/:id", async (req, res) => {
+    const id = req.params.id;
+    const connection = await mysqlDb.getConnection();
+    const [result] = await connection.query("DELETE FROM subjects WHERE id = ?", [id]);
+    res.status(200).send("Entity successfully deleted");
+})
 
 export default subjectsRouter;

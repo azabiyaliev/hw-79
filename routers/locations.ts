@@ -1,6 +1,6 @@
 import express from "express";
 import mysqlDb from "../mysqlDb";
-import {Location, LocationWithoutID} from "../types";
+import { Location, LocationWithoutID} from "../types";
 import {ResultSetHeader} from "mysql2";
 const locationsRouter = express.Router();
 
@@ -52,6 +52,28 @@ locationsRouter.get("/:id", async (req, res) => {
         res.status(404).send(`No location found with this ${id}`);
     } else {
         res.status(200).send(locations[0]);
+    }
+})
+
+locationsRouter.put("/:id", async (req, res) => {
+    const id = req.params.id;
+    const connection = await mysqlDb.getConnection();
+    const [resultWithId] = await connection.query("SELECT * FROM locations WHERE id = ?", [id]);
+    const locationWithId = resultWithId as Location[];
+    const [result] = await connection.query("UPDATE locations SET title = ?, description = ? WHERE id = ?", [req.body.title || locationWithId[0].title, req.body.description || locationWithId[0].description, id]);
+    const [resultLocation] = await connection.query('SELECT * FROM locations WHERE id = ?', [id]);
+    const oneLocation = resultLocation as Location[];
+    res.send(oneLocation[0]);
+})
+
+locationsRouter.delete("/:id", async (req, res, next) => {
+    const id = req.params.id;
+    try {
+        const connection = await mysqlDb.getConnection();
+        const [result] = await connection.query("DELETE FROM locations WHERE id = ?", [id]);
+        res.status(200).send("Entity successfully deleted");
+    } catch (e) {
+        next(e);
     }
 })
 

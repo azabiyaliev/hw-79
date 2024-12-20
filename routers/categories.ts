@@ -54,21 +54,29 @@ categoriesRouter.get("/:id", async (req, res) => {
         res.status(200).send(categories[0]);
     }
 })
-//
-// categoriesRouter.put("/:id", async (req, res) => {
-//     const id = req.params.id;
-//     const connection = await mysqlDb.getConnection();
-//     const [resultWithId] = await connection.query("SELECT * FROM categories WHERE id = ?", [id]);
-//     const categoryWithId = resultWithId as Category[];
-//     console.log(categoryWithId);
-//     const [result] = await connection.query("UPDATE categories SET (title, description) VALUES (?,  ?) WHERE id = ?", [id]);
-//
-// })
-//
-//
-// categoriesRouter.delete("/:id", async (req, res) => {
-//
-// })
+
+categoriesRouter.put("/:id", async (req, res) => {
+    const id = req.params.id;
+    const connection = await mysqlDb.getConnection();
+    const [resultWithId] = await connection.query("SELECT * FROM categories WHERE id = ?", [id]);
+    const categoryWithId = resultWithId as Category[];
+    const [result] = await connection.query("UPDATE categories SET title = ?, description = ? WHERE id = ?", [req.body.title || categoryWithId[0].title, req.body.description || categoryWithId[0].description, id]);
+    const [resultCategory] = await connection.query('SELECT * FROM categories WHERE id = ?', [id]);
+    const oneCategory = resultCategory as Category[];
+    res.send(oneCategory[0]);
+})
+
+
+categoriesRouter.delete("/:id", async (req, res, next) => {
+    const id = req.params.id;
+    try {
+        const connection = await mysqlDb.getConnection();
+        const [result] = await connection.query("DELETE FROM categories WHERE id = ?", [id]);
+        res.status(200).send("Entity successfully deleted");
+    } catch (e) {
+        next(e);
+    }
+})
 
 
 export default categoriesRouter;
